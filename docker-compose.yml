@@ -1,0 +1,43 @@
+version: '3.11'
+
+
+services:
+  bot:
+    build: .
+    restart: always
+    container_name: admin_web_bot
+    ports:
+      - "8000:8000"
+
+
+
+
+
+    #    environment:
+#      TOKEN: 7149796467:AAF-Dcj2_vEr5E_UGhVG3UBViU-AnonEC5Q
+#      DB_USER: postgres
+#      DB_NAME: postgres
+#      DB_HOST: pg
+#      DB_PORT: 5432
+#      DB_PASSWORD: 1
+#      PAYMENT_CLICK_TOKEN: 398062629:TEST:999999999_F91D8F69C042267444B74CC0B3C747757EB0E065
+
+    depends_on:
+      - pg
+
+
+  pg:
+    image: postgres:alpine
+    restart: always
+    container_name: pg_con
+    environment:
+      POSTGRES_PASSWORD: 1
+      TZ: Asia/Tashkent
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+
+
+volumes:
+  pg_data:
