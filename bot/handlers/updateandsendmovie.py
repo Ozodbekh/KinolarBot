@@ -25,10 +25,10 @@ async def get_movie_by_code(message: Message):
     try:
         movie_id = int(message.text)
         movie = await Movie.get(id_=movie_id)
-        HistoryUser.create(send_codes=movie_id)
 
         if movie:
-            await message.answer_video(video=movie.file_id, caption=_("Here is your movie."))
+            await HistoryUser.create(sent_codes=movie_router, user_id=message.from_user.id)
+            await message.answer_video(video=movie.file_id, caption=movie.descreption)
         else:
             await message.answer(_("Movie not found. Please check the movie code."))
     except ValueError:
@@ -36,3 +36,7 @@ async def get_movie_by_code(message: Message):
     except Exception as error:
         await message.answer(_("Something went wrong"))
         await message.answer(str(error))
+
+
+
+
