@@ -1,6 +1,5 @@
 import asyncio
 from aiogram import Router, F, Bot
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
@@ -10,7 +9,7 @@ from db.models import Advertising, User
 
 add_router = Router()
 
-async def admin_id(user_id):
+async def admin_id_(user_id):
     ads = await Advertising.get_all()
     ids = [ad.admin_id for ad in ads]
     return user_id in ids
@@ -20,19 +19,20 @@ async def get_all_user_id():
     ids = [user.id for user in data]
     return ids
 
+
 class AdvertiseState(StatesGroup):
     media = State()
     description = State()
 
 
-@add_router.message(Command('advertise'))
+@add_router.message(F.text.lower() == 'advertise')
 async def advertise_handler(message: Message, state: FSMContext):
-    check_user = await admin_id(message.from_user.id)
+    check_user = await admin_id_(message.from_user.id)
     if check_user:
         await state.set_state(AdvertiseState.media)
         await message.answer(_("Please send promotional media 🔽"))
     else:
-        await message.answer(_("You do not have the right to post an ad."))
+        await message.answer(_("You do not have the right to post an ad 🛑"))
 
 
 @add_router.message(AdvertiseState.media)
@@ -52,6 +52,7 @@ async def advertise_media(message: Message, state: FSMContext):
 async def advertise_description(message: Message, state: FSMContext, bot: Bot):
     description = message.text
     data = await state.get_data()
+    await state.clear()
     file_id = data.get('file_id')
     media_type = data.get('media_type')
 
@@ -79,4 +80,4 @@ async def advertise_description(message: Message, state: FSMContext, bot: Bot):
         if tasks:
             await asyncio.gather(*tasks)
 
-    await message.answer(_("Advertisement sent to all users!"))
+    await message.answer(_("Advertisement sent to all users ✅"))
