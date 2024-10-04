@@ -4,20 +4,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
+from bot.handlers.functions import get_all_bot_users, get_admin_ids
 
-from db.models import Advertising, User
 
 add_router = Router()
-
-async def admin_id_(user_id):
-    ads = await Advertising.get_all()
-    ids = [ad.admin_id for ad in ads]
-    return user_id in ids
-
-async def get_all_user_id():
-    data = await User.get_all()
-    ids = [user.id for user in data]
-    return ids
 
 
 class AdvertiseState(StatesGroup):
@@ -27,7 +17,7 @@ class AdvertiseState(StatesGroup):
 
 @add_router.message(F.text.lower() == 'advertise')
 async def advertise_handler(message: Message, state: FSMContext):
-    check_user = await admin_id_(message.from_user.id)
+    check_user = await get_admin_ids(message.from_user.id)
     if check_user:
         await state.set_state(AdvertiseState.media)
         await message.answer(_("Please send promotional media 🔽"))
@@ -56,7 +46,7 @@ async def advertise_description(message: Message, state: FSMContext, bot: Bot):
     file_id = data.get('file_id')
     media_type = data.get('media_type')
 
-    user_ids = await get_all_user_id()
+    user_ids = await get_all_bot_users()
     tasks = []
     count = 0
 
